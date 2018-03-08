@@ -11,7 +11,7 @@ def norm_pdf(x):
     # true
     # return np.exp(-x ** 2 / 2) / np.sqrt(2 * np.pi)
     # multiplied by a constant
-    return np.exp(-x ** 2)
+    return np.exp(-x ** 2 / 2)
 
 
 class ParticleFilter(object):
@@ -24,15 +24,11 @@ class ParticleFilter(object):
         self.n_targets = sim_config['n_bodies']
 
         self.measurement_noise = sim_config['measurement_noise']
-        # if self.measurement_noise == 0.0:
-        #     self.measurement_noise = 0.05
 
         self.dynamics_noise = sim_config['dynamics_noise']
-        # if self.dynamics_noise == 0.0:
-        #     self.sim_config['dynamics_noise'] = 0.01
 
         for _ in range(self.n):
-            self.parts.append(balls_sim.World(**sim_config))
+            self.parts.append(balls_sim.World(**self.sim_config))
         self.w = np.ones(n_particles)/n_particles
 
         space = np.linspace(0.5, WORLD_LEN - 0.5, WORLD_LEN)
@@ -63,13 +59,17 @@ class ParticleFilter(object):
 
         for i, part in enumerate(self.parts):
             for j, body in enumerate(part.bodies):
-                dist = np.linalg.norm(measurement[j] - body.pos)
-                self.w[i] *= norm_pdf(dist / self.measurement_noise)
+                # dist = np.linalg.norm(measurement[j] - body.pos)
+                # self.w[i] *= norm_pdf(dist / (np.sqrt(np.sqrt(self.measurement_noise))))
+
+                errors_2 = (measurement[j] - body.pos)**2
+                self.w[i] *= norm_pdf(errors_2[0]/np.sqrt(self.measurement_noise)) * norm_pdf(errors_2[1]/np.sqrt(self.measurement_noise))
 
         self.w /= np.sum(self.w)
 
     def resample(self):
         indices = np.array(range(self.n))
+        self.w /= np.sum(self.w)
         samples_i = np.random.choice(indices, self.n, p=self.w)
 
         new_parts = []
@@ -111,8 +111,8 @@ class ParticleFilter(object):
         for i, part in enumerate(self.parts):
             part_im = np.zeros((WORLD_LEN, WORLD_LEN))
             for body in part.bodies:
-                pos_x = body.pos[0]
-                pos_y = body.pos[1]
+                pos_x = body.pos[0] + self.measurement_noise * np.random.randn(1)
+                pos_y = body.pos[1] + self.measurement_noise * np.random.randn(1)
                 radius = body.r
 
                 # for non rolling images simply:
