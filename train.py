@@ -21,7 +21,7 @@ AVERAGING_BATCH_SIZE = 16
 EP_LEN = 100
 
 AVERAGING_ERROR_MULTIPLIER = 500
-AVERAGING_FUTURE_ERROR_MULTIPLIER = 200
+AVERAGING_FUTURE_ERROR_MULTIPLIER = 500
 AVERAGE_N_STEPS_AHEAD = 4
 
 BALLS_OBS_SHAPE = (1, 28, 28)
@@ -53,6 +53,8 @@ if __name__ == "__main__":
                         help="Different training modes enable training of different parts of the network")
     parser.add_argument('--p_mask', default=0.99, type=float,
                         help="What fraction of input observations is masked? eg 0.6")
+    parser.add_argument('--av_loss', default=AVERAGING_FUTURE_ERROR_MULTIPLIER, type=float,
+                        help="Multiplier for the future averaging loss. eg 500")
     parser.add_argument('--reward_only_masked', default=0, type=int,
                         choices=[0, 1],
                         help="Should pae train only from masked observations error or all? Use only if observations are"
@@ -73,6 +75,7 @@ if __name__ == "__main__":
     updates_per_epoch = args.updates_per_epoch
     training_stage = args.training_stage
     p_mask = args.p_mask
+    av_loss_multiplier = args.av_loss
     use_cuda = bool(args.cuda)
     compare_with_pf = bool(args.compare_with_pf)
     reward_only_masked = bool(args.reward_only_masked)
@@ -96,7 +99,7 @@ if __name__ == "__main__":
         train_g_switch = True
         train_av_switch = True
     elif training_stage == "future-sampler":
-        train_d_every_n_updates = 5
+        train_d_every_n_updates = 7
         train_pae_switch = False
         train_d_switch = True
         train_g_switch = True
@@ -385,7 +388,7 @@ if __name__ == "__main__":
 
                 # normalise error to ~1
 
-                losses.append(AVERAGING_FUTURE_ERROR_MULTIPLIER * err_future_av)
+                losses.append(av_loss_multiplier * err_future_av)
                 epoch_report['av fut loss'] = err_future_av.data[0]
 
                 if update % 50 == 0:

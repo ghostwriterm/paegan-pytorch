@@ -15,7 +15,7 @@ simulation_config = {
     'mass': 1.0,
     'wall_action': 'bounce',
     'ball_action': 'bounce',
-    'measurement_noise': 0.001,
+    'measurement_noise': 0.0003,
     'dynamics_noise': 0.01,
 }
 
