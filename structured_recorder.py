@@ -8,27 +8,28 @@ import numpy as np
 import torch
 
 simulation_config = {
-    'n_bodies': 2,
+    'n_bodies': 1,
     'radius_mode': 'uniform',
     'radius': 2.0,
     'mass_mode': 'uniform',
     'mass': 1.0,
-    'wall_action': 'bounce',
+    'wall_action': 'pass',
     'ball_action': 'bounce',
-    'measurement_noise': 0.0003,
+    # 'measurement_noise': 0.0003,
+    'measurement_noise': 0.5,
     'dynamics_noise': 0.01,
 }
 
 record_config = {
-    'sim_type': 'two-bb',
+    'sim_type': 'one-noise',
     'sim_config': simulation_config,
-    'train': 'train',
-    # 'train': 'valid',
-    # 'n_episodes': 100,
-    'n_episodes': 2000,
+    # 'train': 'train',
+    'train': 'valid',
+    'n_episodes': 100,
+    # 'n_episodes': 2000,
     'episode_length': 100,
-    'folder': 'data-balls/',
-    'random_seed': 1
+    'folder': 'generated-data/',
+    'random_seed': 15
 }
 
 

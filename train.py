@@ -22,7 +22,7 @@ EP_LEN = 100
 
 AVERAGING_ERROR_MULTIPLIER = 500
 AVERAGING_FUTURE_ERROR_MULTIPLIER = 500
-AVERAGE_N_STEPS_AHEAD = 4
+N_STEPS_AHEAD = 4
 
 BALLS_OBS_SHAPE = (1, 28, 28)
 
@@ -89,21 +89,15 @@ if __name__ == "__main__":
 
     if training_stage == "pae":
         train_pae_switch = True
-        train_d_switch = False
-        train_g_switch = False
-        train_av_switch = False
     elif training_stage == "visual-sampler":
         train_d_every_n_updates = 5
-        train_pae_switch = False
         train_d_switch = True
         train_g_switch = True
         train_av_switch = True
     elif training_stage == "future-sampler":
         train_d_every_n_updates = 7
-        train_pae_switch = False
         train_d_switch = True
         train_g_switch = True
-        train_av_switch = False
         train_av_future_switch = True
     else:
         raise ValueError('Wrong training stage {}'.format(training_stage))
@@ -340,7 +334,7 @@ if __name__ == "__main__":
                 err_av = criterion_gen_averaged(sample_av, obs_exp.detach())
 
                 # normalise error to ~1
-                losses.append(AVERAGING_ERROR_MULTIPLIER * err_av)
+                losses.append(av_loss_multiplier * err_av)
                 epoch_report['av loss'] = err_av.data[0]
 
                 if update % 50 == 0:
@@ -353,7 +347,7 @@ if __name__ == "__main__":
             if train_av_future_switch is True:
                 assert train_pae_switch is False
 
-                n_steps_ahead = int(np.random.randint(1, AVERAGE_N_STEPS_AHEAD))
+                n_steps_ahead = int(np.random.randint(1, N_STEPS_AHEAD))
 
                 # draw random states
                 draw = np.random.choice(EP_LEN * PAE_BATCH_SIZE, size=1, replace=False)
