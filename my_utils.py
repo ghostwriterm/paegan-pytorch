@@ -58,7 +58,7 @@ import torch
 import matplotlib.pyplot as plt
 
 
-def pf_multi_run_plot(net, sim_conf, fpath='temp/last_test.csv', cuda=True, runs=10, p_mask=1.0, n_particles=100):
+def pf_multi_run_plot(net, sim_conf, fpath='ims/last_test.csv', cuda=True, runs=10, p_mask=1.0, n_particles=100, gif_no=0):
     CONSISTENT_NOISE = False
     RUN_LENGTH = 160
     DURATION = 0.4
@@ -164,7 +164,7 @@ def pf_multi_run_plot(net, sim_conf, fpath='temp/last_test.csv', cuda=True, runs
     av_pixel_intensity = np.mean(ims_ar)
     baseline_level = np.mean((ims_ar - av_pixel_intensity) ** 2)
     baseline = np.ones(len(loss_pf)) * baseline_level
-    print("Uninformative baseline level at {}".format(baseline_level))
+    # print("Uninformative baseline level at {}".format(baseline_level))
 
     pf_loss_ar /= runs
     pae_loss_ar /= runs
@@ -186,15 +186,15 @@ def pf_multi_run_plot(net, sim_conf, fpath='temp/last_test.csv', cuda=True, runs
     plt.xlabel("timestep")
     plt.legend(["PF", "PAE", "baseline"], loc=4)
 
-    gif_no = 0
-    plt.savefig("temp/{}-plot.png".format(gif_no))
-    plt.show()
+    plt.savefig("ims/{}-plot.png".format(gif_no))
+    # plt.show()
+    plt.clf()
 
-    imageio.mimsave("temp/{}-percept.gif".format(gif_no), ims_percept, duration=DURATION)
-    imageio.mimsave("temp/{}-pf_belief.gif".format(gif_no), ims_pf_belief, duration=DURATION)
-    imageio.mimsave("temp/{}-pf_sample.gif".format(gif_no), ims_pf_sample, duration=DURATION)
-    imageio.mimsave("temp/{}-pae_belief.gif".format(gif_no), pae_ims, duration=DURATION)
-    imageio.mimsave("temp/{}-pae_sample.gif".format(gif_no), pae_samples_ims, duration=DURATION)
+    imageio.mimsave("ims/{}-percept.gif".format(gif_no), ims_percept, duration=DURATION)
+    imageio.mimsave("ims/{}-pf_belief.gif".format(gif_no), ims_pf_belief, duration=DURATION)
+    imageio.mimsave("ims/{}-pf_sample.gif".format(gif_no), ims_pf_sample, duration=DURATION)
+    imageio.mimsave("ims/{}-pae_belief.gif".format(gif_no), pae_ims, duration=DURATION)
+    imageio.mimsave("ims/{}-pae_sample.gif".format(gif_no), pae_samples_ims, duration=DURATION)
 
     page = """
     <html>
@@ -224,7 +224,7 @@ def pf_multi_run_plot(net, sim_conf, fpath='temp/last_test.csv', cuda=True, runs
     </html>
     """.format(gif_no, sim_conf)
 
-    with open("temp/page-{}.html".format(gif_no), 'w') as f:
+    with open("ims/page-{}.html".format(gif_no), 'w') as f:
         f.write(page)
 
 
@@ -232,7 +232,7 @@ def pf_comparison(net, sim_conf, path, gif_no, cuda=True):
     CONSISTENT_NOISE = False
     RUN_LENGTH = 160
     N_PARTICLES = 400
-    DURATION = 0.5
+    DURATION = 0.3
     N_SIZE = 256
 
     w = World(**sim_conf)
